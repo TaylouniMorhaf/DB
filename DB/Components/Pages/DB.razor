@@ -1,7 +1,9 @@
 ﻿@page "/weather"
 @using System.Diagnostics
 @using MySql.Data.MySqlClient;
+@using DB.Classes
 @attribute [StreamRendering]
+@rendermode InteractiveServer
 
 <PageTitle>Database</PageTitle>
 
@@ -40,7 +42,7 @@ else
 
 @code {
 
-    private List<Test> entries = new List<Test>();
+    private List<Person> entries = new List<Person>();
 
     private MySqlConnection _connection = new("server = localhost; user = root; password = insy; database = scottnew");
 
@@ -55,30 +57,13 @@ else
         {
             int value1 = reader.GetInt32(0);
             string value2 = reader.GetString(1);
-            entries.Add(new Test { Id = value1, Value = value2 });
+            string value3 = reader.GetString(2);
+            entries.Add(new Person { Id = value1, FirstName = value2, LastName = value3 });
         }
         _connection.Close();
     }
 
-    public class Test
-    {   
-        public int Id { get; set; }
-        public string Value { get; set; }
-    }
 
-    public void DeleteEntry(Test entry)
-    {
-        _connection.Open();
-        var sql = "DELETE FROM emps WHERE id = @id";
-        using var cmd = new MySqlCommand(sql, _connection);
-        cmd.Parameters.AddWithValue("@id", entry.Id);
-        cmd.ExecuteNonQuery();
-
-        entries.Remove(entry);
-
-        _connection.Close();
-
-        OnInitialized();
-    }
+    
 
 }
