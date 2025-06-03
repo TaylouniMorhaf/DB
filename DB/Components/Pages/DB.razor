@@ -42,19 +42,33 @@ else
             }
         </tbody>
     </table>
+    <h2>Add New Entry</h2>
+    <div>
+        <input type="text" @bind="newFirstName" placeholder="First Name" />
+        <input type="text" @bind="newLastName" placeholder="Last Name" />
+        <button @onclick="AddEntry">Add</button>
+    </div>
 }
 
 @code {
 
     private List<Person> entries = new List<Person>();
+    private string? newFirstName; 
+    private string? newLastName;  
 
-    private MySqlConnection _connection = new("server = localhost; user = root; password = insy; database = scottnew");
+    private MySqlConnection _connection = new("server = localhost; user = root; password = insy; database = PersonDB");
 
     protected override void OnInitialized()
     {
+        LoadEntries();
+    }
+
+    private void LoadEntries()
+    {
+        entries.Clear();
         _connection.Open();
 
-        using var command = new MySqlCommand("SELECT * FROM emps;", _connection);
+        using var command = new MySqlCommand("SELECT * FROM Persons;", _connection);
         using var reader = command.ExecuteReader();
 
         while (reader.Read())
@@ -70,7 +84,7 @@ else
     public void DeleteEntry(Person entry)
     {
         _connection.Open();
-        var sql = "DELETE FROM emps WHERE id = @Id";
+        var sql = "DELETE FROM Persons WHERE id = @Id";
         using var cmd = new MySqlCommand(sql, _connection);
         cmd.Parameters.AddWithValue("@Id", entry.Id);
         cmd.ExecuteNonQuery();
@@ -79,13 +93,13 @@ else
 
         _connection.Close();
 
-        OnInitialized();
+        LoadEntries();
     }
 
     public void UpdateEntry(Person entry)
     {
         _connection.Open();
-        var sql = "UPDATE emps SET first_name = @FirstName, last_name = @LastName WHERE id = @Id";
+        var sql = "UPDATE Persons SET FirstName = @FirstName, LastName = @LastName WHERE id = @Id";
         using var cmd = new MySqlCommand(sql, _connection);
         cmd.Parameters.AddWithValue("@Id", entry.Id);
         cmd.Parameters.AddWithValue("@FirstName", entry.FirstName);
@@ -94,6 +108,25 @@ else
 
         _connection.Close();
 
-        OnInitialized();
+        LoadEntries();
+    }
+
+    public void AddEntry()
+    {
+        if (!string.IsNullOrWhiteSpace(newFirstName) && !string.IsNullOrWhiteSpace(newLastName))
+        {
+            _connection.Open();
+            var sql = "INSERT INTO Persons (FirstName, LastName) VALUES (@FirstName, @LastName)";
+            using var cmd = new MySqlCommand(sql, _connection);
+            cmd.Parameters.AddWithValue("@FirstName", newFirstName);
+            cmd.Parameters.AddWithValue("@LastName", newLastName);
+            cmd.ExecuteNonQuery();
+
+            newFirstName = ""; 
+            newLastName = ""; 
+            _connection.Close();
+
+            LoadEntries();
+        }
     }
 }
