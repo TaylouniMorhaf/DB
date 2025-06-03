@@ -1,4 +1,4 @@
-﻿namespace DB.Classes
+﻿namespace DB.Components.Pages
 {
     public class Person
     {

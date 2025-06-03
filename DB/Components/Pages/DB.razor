@@ -1,14 +1,12 @@
 ﻿@page "/weather"
 @using System.Diagnostics
 @using MySql.Data.MySqlClient;
-@using DB.Classes
 @attribute [StreamRendering]
 @rendermode InteractiveServer
 
 <PageTitle>Database</PageTitle>
 
 <h1>Database</h1>
-
 
 @if (entries == null)
 {
@@ -20,7 +18,9 @@ else
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Value</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -28,17 +28,21 @@ else
             {
                 <tr>
                     <td>@entry.Id</td>
-                    <td>@entry.Value</td>
                     <td>
+                        <input type="text" @bind="entry.FirstName" />
+                    </td>
+                    <td>
+                        <input type="text" @bind="entry.LastName" />
+                    </td>
+                    <td>
+                        <button @onclick="() => UpdateEntry(entry)">Update</button>
                         <button @onclick="() => DeleteEntry(entry)">Delete</button>
                     </td>
-                </tr>
+                </tr> 
             }
         </tbody>
     </table>
 }
-
-
 
 @code {
 
@@ -78,7 +82,18 @@ else
         OnInitialized();
     }
 
-    
-    
+    public void UpdateEntry(Person entry)
+    {
+        _connection.Open();
+        var sql = "UPDATE emps SET first_name = @FirstName, last_name = @LastName WHERE id = @Id";
+        using var cmd = new MySqlCommand(sql, _connection);
+        cmd.Parameters.AddWithValue("@Id", entry.Id);
+        cmd.Parameters.AddWithValue("@FirstName", entry.FirstName);
+        cmd.Parameters.AddWithValue("@LastName", entry.LastName);
+        cmd.ExecuteNonQuery();
 
+        _connection.Close();
+
+        OnInitialized();
+    }
 }
