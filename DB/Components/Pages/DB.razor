@@ -63,7 +63,22 @@ else
         _connection.Close();
     }
 
+    public void DeleteEntry(Person entry)
+    {
+        _connection.Open();
+        var sql = "DELETE FROM emps WHERE id = @Id";
+        using var cmd = new MySqlCommand(sql, _connection);
+        cmd.Parameters.AddWithValue("@Id", entry.Id);
+        cmd.ExecuteNonQuery();
 
+        entries.Remove(entry);
+
+        _connection.Close();
+
+        OnInitialized();
+    }
+
+    
     
 
 }
